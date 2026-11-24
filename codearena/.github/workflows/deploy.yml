@@ -1,0 +1,32 @@
+name: Deploy CodeArena Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/codearena
+            git pull origin main
+            cd server
+            npm install --production
+            pm2 restart codearena-backend
+            pm2 save
+            echo "✅ Backend deployed successfully!"
