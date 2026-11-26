@@ -269,7 +269,15 @@ const problems = [
 
 const seed = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+    if (!mongoUri) {
+      throw new Error(
+        'MongoDB URI is missing. Set MONGODB_URI or MONGO_URI in server/.env.'
+      );
+    }
+
+    await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
 
     await Problem.deleteMany({});
